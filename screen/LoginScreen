@@ -1,0 +1,179 @@
+import React from 'react';
+import { Text, View,StyleSheet,TouchableOpacity, TextInput, Image,KeyboardAvoidingView, Modal, ScrollView} from 'react-native';
+import db from '../config'
+import firebase from 'firebase'
+import { withOrientation } from 'react-navigation';
+
+export default class LoginScreen extends React.Component{
+    constructor(){
+        super()
+
+        this.state={
+            emailId:"",
+            password:"",
+            firstName:"",
+            lastName:"",
+            address:"",
+            conatact:"",
+            confirmPassword:"",
+            isModalVisible:false
+        }
+    }
+
+    showModal=()=>{
+        return(
+            <Modal
+            animationType="fade"
+            transparent={true}
+            visible={this.state.isModalVisible}
+            >
+                <View style={styles.modalContanier}>
+                <ScrollView style={{width:"100%"}}>
+                <KeyboardAvoidingView style={styles.KeyboardAvoidingView}>
+                       <Text style={styles.title}>REGISTRATION FORM</Text>
+                       <TextInput 
+                       style={styles.formTextInput}
+                       placeholder="First Name"
+                       maxLength={10}
+                       onChangeText={(text)=>{
+                           this.setState({
+                               firstName:text
+                           })
+                       }}/>  
+
+                       <TextInput 
+                       style={styles.formTextInput}
+                       placeholder="Last Name"
+                       maxLength={10}
+                       onChangeText={(text)=>{
+                           this.setState({
+                               lastName:text
+                           })
+                       }}/>  
+                </KeyboardAvoidingView>
+                </ScrollView>
+                </View>
+            </Modal>
+        )
+    }
+
+    login=async(email,password)=>{
+        if(email && password){
+            try{
+                const response=await firebase.auth().signInWithEmailAndPassword(email,password)
+                console.log('hi')
+                if(response === true){
+                    this.props.navigation.navigate('Transaction')
+                }
+            }
+
+            catch(error){
+                switch(error.code){
+                    case "auth/user-not-found":
+                        alert('user donst exists');
+
+                        break;
+                    case "auth/invaild-email":
+                        alert('incorrect email or password')
+                        break   
+                }
+            }
+        }
+        else {
+            alert('enter email and password')
+        }
+    }
+    render(){
+        return(
+            <KeyboardAvoidingView style={{alignItems:'center',marginTop:20}}>
+
+                {this.showModal()}
+
+            <View>
+               <TextInput 
+               style={styles.loginBox}
+               placeholder="abc@xyz.com"
+               keyboardType="email-address"
+               onChangeText={(text)=>{
+                   this.setState({
+                       emailId:text
+                   })
+               }}/> 
+               <TextInput 
+               style={styles.loginBox}
+               placeholder="Password"
+               secureTextEntry={true}
+               onChangeText={(text)=>{
+                   this.setState({
+                       password:text
+                   })
+               }}/> 
+            </View>
+            <View>
+                <TouchableOpacity style={styles.loginButton} onPress={()=>{
+                    this.login(this.state.emailId,this.state.password)
+                }}>
+                    <Text style={{textAlign:'center'}}>LOGIN</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity style={styles.loginButton} onPress={()=>{
+                    this.setState({isModalVisible:true})
+                }}>
+                    <Text style={{textAlign:'center'}}>LOGIN</Text>
+                </TouchableOpacity>
+            </View>
+            </KeyboardAvoidingView>
+        )
+    }
+}
+
+const styles=StyleSheet.create({
+    loginBox:{
+        borderWidth:2,
+        fontSize:20,
+        width:300,
+        height:40,
+        margin:10,
+        padding:10
+    },
+    loginButton:{
+        height:40,
+        width:100,
+        borderWidth:2,
+        marginTop:20,
+        borderRadius:10
+    },
+    KeyboardAvoidingView:{
+        flex:1,
+        justifyContent:"center",
+        alignItems:"center"
+    },
+    modalContanier:{
+        flex:1,
+        justifyContent:"center",
+        alignItems:"center",
+        borderRadius:20,
+        backgroundColor:"#fffff",
+        marginTop:80,
+        marginBottom:80,
+        marginLeft:30,
+        marginRight:30
+    },
+    title:{
+        justifyContent:"center",
+        alignItems:"center",
+        fontSize:30,
+        margin:50,
+        color:"#ff5522"
+    },
+    formTextInput:{
+        width:"75%",
+        height:30,
+        alignSelf:"center",
+        marginTop:10,
+        padding:10,
+        borderWidth:1,
+        borderRadius:10,
+        borderColor:"#ffab91"
+    }
+})
